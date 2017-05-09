@@ -29,9 +29,11 @@ public class formGerenciarEstoque extends javax.swing.JInternalFrame {
     
     //Insere itens na tabela estoque do BD
     //Variaveis - id:serial (nao aparece aqui pq ele se auto-incrementa); item:String ; quantidade:inteiro.
-    public void cadastrarItensEstoque(){
+    public boolean cadastrarItensEstoque(String item, int quantidade){
         //Variável para a modificação de itens no BD
         String sql;
+        String nome_pattern = "^[A-Za-z ]{3,50}+$";
+        String num_pattern = "[1-9, /.]+";
         //Essa variável recebe um comando de inserção de valores no banco de dados, onde os parâmetros estão dentro do try abaixo
         sql = "Insert into estoque(item, quantidade) values (?, ?)";
         try{
@@ -40,16 +42,32 @@ public class formGerenciarEstoque extends javax.swing.JInternalFrame {
             //Aqui começa a zueira, o textoItem é a caixa de texto da janela GerenciarEstoque, qualquer coisa que o usuario digitar, vai ser inserida no pst.setString
             //Para fazer a condição dos if's e else's, seria bom pegar as variaveis textoAlgumaCoisa, pois elas que possuem os valores que o usuário digitou
             //O 1 dentro do setString significa que o item ta na coluna 1 da tabela
-            pst.setString(1, textoItem.getText());
+            pst.setString(1, item);
             //O textoQuantidade é a caixa de texto do item quantidade, tive que realizar conversao de String para int, porque a variavel quantidade é int
             //O 2 dentro do setString significa que a quantidade ta na coluna 2 da tabela
-            pst.setInt(2, Integer.parseInt(textoQuantidade.getText()));
+            pst.setInt(2, quantidade);
             //Vai tentar executar as inserções no banco de dados, se for bem sucedida, vai mostrar a mensagem Cadastro bem sucedido, se não, vai entrar no catch
-            pst.execute();
-            JOptionPane.showMessageDialog(null, "Cadastro Bem-Sucedido!", "Cadastrado com sucesso!", JOptionPane.INFORMATION_MESSAGE);
+            if(item.trim().isEmpty() || item.length() < 3 || item.length() > 50){
+                JOptionPane.showMessageDialog(null, "Item com tamanho invalido!");
+                return false;
+            }
+            else if (!item.matches(nome_pattern)){
+                JOptionPane.showMessageDialog(null, "Item com caracter invalido!");
+                return false;
+            }
+            else if (quantidade < 0 || quantidade > 9999 ){
+                JOptionPane.showMessageDialog(null, "Quantidade de itens invalida!");
+                return false;
+            }
+            else{
+                pst.execute();
+                JOptionPane.showMessageDialog(null, "Cadastro Bem-Sucedido!", "Cadastrado com sucesso!", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            }
         }
         catch(SQLException error){
             JOptionPane.showMessageDialog(null, error);
+            return false;
         }
     }
     //Imprime na tela todos os itens da tabela estoque
@@ -269,7 +287,9 @@ public class formGerenciarEstoque extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       cadastrarItensEstoque();
+        String item = textoItem.getText();
+        int quantidade = Integer.parseInt(textoQuantidade.getText());
+        cadastrarItensEstoque(item, quantidade);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void tabelaEstoqueMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaEstoqueMouseClicked

@@ -29,10 +29,11 @@ public class formGerenciarMenu extends javax.swing.JInternalFrame {
     
     //Insere itens na tabela menu do BD
     //Variaveis - id:serial (nao aparece aqui pq ele se auto-incrementa); item:String ; preco:double.
-    public boolean cadastraItensMenu(){
+    public boolean cadastraItensMenu(String item, double preco){
         //Variável para a modificação de itens no BD
         String sql, teste;
         String nome_pattern = "^[A-Za-z ]{1,50}+$";
+        String num_pattern = "[1-9]+";
         
         //Essa variável recebe um comando de inserção de valores no banco de dados, onde os parâmetros estão dentro do try abaixo
         sql = "Insert into menu(item,  preco) values (?,?)";
@@ -42,26 +43,33 @@ public class formGerenciarMenu extends javax.swing.JInternalFrame {
             //Para fazer a condição dos if's e else's, seria bom pegar as variaveis textoAlgumaCoisa, pois elas que possuem os valores que o usuário digitou
             //O 1 dentro do setString significa que o item ta na coluna 1 da tabela
             pst = conecta.prepareStatement(sql);
-            pst.setString(1, textoItem.getText());
+            pst.setString(1, item);
             //O textoPreco é a caixa de texto do item preco, tive que realizar conversao de texto para double, porque a variavel preco é double
             //O 2 dentro do setString significa que o preco ta na coluna 2 da tabela
-            pst.setDouble(2, Double.parseDouble(textoPreco.getText()));
+            pst.setDouble(2, preco);
+            String precoString = Double.toString(preco);
             //Vai tentar executar as inserções no banco de dados, se for bem sucedida, vai mostrar a mensagem Cadastro bem sucedido, se não, vai entrar no catch
-            if(textoItem.getText().trim().isEmpty() || textoItem.getText().length() < 0 || textoItem.getText().length() > 50){
-                System.out.println(textoItem.getText().trim().isEmpty());
+            if(item.trim().isEmpty() || item.length() < 3 || item.length() > 50){
                 JOptionPane.showMessageDialog(null, "Item com tamanho invalido!");
                 return false;
             }
-            else if (!textoItem.getText().matches(nome_pattern)){
+            else if (!item.matches(nome_pattern)){
                 JOptionPane.showMessageDialog(null, "Item com caracter invalido!");
                 return false;
             }
+            /*else if (!precoString.matches(num_pattern)){
+                JOptionPane.showMessageDialog(null, "Preço com digitos invalidos!");
+                return false;
+            }*/
+            else if (preco <= 0.0 || preco > 10000.00 ){
+                JOptionPane.showMessageDialog(null, "Preço invalido!");
+                return false;
+            }
             else{
-                System.out.println(textoItem.getText().trim().isEmpty());
                 pst.execute();
                 JOptionPane.showMessageDialog(null, "Cadastro Bem-Sucedido!", "Cadastrado com sucesso!", JOptionPane.INFORMATION_MESSAGE);
                 return true;
-            }
+            }   
         }
         catch(SQLException error){
             JOptionPane.showMessageDialog(null, error);
@@ -80,8 +88,7 @@ public class formGerenciarMenu extends javax.swing.JInternalFrame {
             rs = pst.executeQuery();
             //O tabelaMenu é a planilha que tem na janela, vai pegar o rs e vai jogar la bonitinho com todos os dados da tabela
             tabelaMenu.setModel(DbUtils.resultSetToTableModel(rs));
-        }
-        
+        } 
         catch(SQLException error){
             JOptionPane.showMessageDialog(null, error);
         }
@@ -284,7 +291,9 @@ public class formGerenciarMenu extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        cadastraItensMenu();
+        String item = textoItem.getText();
+        Double preco = Double.parseDouble(textoPreco.getText());
+        cadastraItensMenu(item, preco);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed

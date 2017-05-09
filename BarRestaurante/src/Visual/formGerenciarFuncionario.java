@@ -28,9 +28,13 @@ public class formGerenciarFuncionario extends javax.swing.JInternalFrame {
     }
     //Insere valores na tabela funcionario do BD
     //Variaveis - id:serial (nao aparece aqui pq ele se auto-incrementa); nome:String ; telefone:String ; endereco:String.
-    public void cadastrarFuncionario(){
+    
+    public boolean cadastrarFuncionario(String nome, String telefone, String endereco){
         //Variável para a modificação de itens no BD
         String sql;
+        String nome_pattern = "^[A-Za-z ]{1,50}+$";
+        String tel_pattern = "\\d{2,3}-\\d{4,5}-\\d{4}";
+        String end_pattern = "^[A-Za-z1-9 ]{1,50}+$";
         //Essa variável recebe um comando de inserção de valores no banco de dados, onde os parâmetros estão dentro do try abaixo
         sql = "Insert into funcionarios(nome, telefone, endereco) values (?, ?, ?)";
         try{
@@ -39,19 +43,47 @@ public class formGerenciarFuncionario extends javax.swing.JInternalFrame {
             //Aqui começa a zueira, o textoNome é a caixa de texto da janela GerenciarFuncionario, qualquer coisa que o usuario digitar, vai ser inserida no pst.setString
             //Para fazer a condição dos if's e else's, seria bom pegar as variaveis textoAlgumaCoisa, pois elas que possuem os valores que o usuário digitou
             //O 1 dentro do setString significa que o item ta na coluna 1 da tabela
-            pst.setString(1, textoNome.getText());
+            pst.setString(1, nome);
             //O textoTelefone é a caixa de texto do item telefone
             //O 2 dentro do setString significa que a quantidade ta na coluna 2 da tabela
-            pst.setString(2, textoTelefone.getText());
+            pst.setString(2, telefone);
             //O textoEndereco é a caixa de texto do item endereco
             //O 2 dentro do setString significa que a quantidade ta na coluna 3 da tabela
-            pst.setString(3, textoEndereco.getText());
+            pst.setString(3, endereco);
             //Vai tentar executar as inserções no banco de dados, se for bem sucedida, vai mostrar a mensagem Cadastro bem sucedido, se não, vai entrar no catch
-            pst.execute();
-            JOptionPane.showMessageDialog(null, "Cadastro Bem-Sucedido!", "Cadastrado com sucesso!", JOptionPane.INFORMATION_MESSAGE);
+            if(nome.trim().isEmpty() || nome.length() <= 3 || nome.length() >= 50){
+                JOptionPane.showMessageDialog(null, "Nome com tamanho invalido!");
+                return false;
+            }
+            else if(!nome.matches(nome_pattern)){
+                JOptionPane.showMessageDialog(null, "Nome com caracteres invalidos!");
+                return false;
+            } 
+            else if(telefone.trim().isEmpty()){
+                JOptionPane.showMessageDialog(null, "Telefone com tamanho invalido!");
+                return false;
+            } 
+            else if(!telefone.matches(tel_pattern)){
+                JOptionPane.showMessageDialog(null, "Telefone com digitos invalidos!");
+                return false;
+            }
+            if(endereco.trim().isEmpty() || endereco.length() <= 5 || endereco.length() > 50){
+                JOptionPane.showMessageDialog(null, "Nome com tamanho invalido!");
+                return false;
+            }
+            else if(!endereco.matches(nome_pattern)){
+                JOptionPane.showMessageDialog(null, "Endereco com caracteres invalidos!");
+                return false;
+            } 
+            else{
+                pst.execute();
+                JOptionPane.showMessageDialog(null, "Cadastro Bem-Sucedido!", "Cadastrado com sucesso!", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            }
         }
         catch(SQLException error){
             JOptionPane.showMessageDialog(null, error);
+            return false;
         }
     }
     
@@ -307,7 +339,10 @@ public class formGerenciarFuncionario extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        cadastrarFuncionario();
+        String nome = textoNome.getText();
+        String telefone = textoTelefone.getText();
+        String endereco = textoEndereco.getText();
+        cadastrarFuncionario(nome, telefone, endereco);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
